@@ -53,6 +53,15 @@ int input(char *text, char *str, int max_len)
     }
 }
 
+// Comparar com senha já salva
+int passwdcompare(char *passwd)
+{
+    char passwdcompare[512];
+    input("Digite sua senha\n-> ",passwdcompare,512);
+    printf("%s - %s",passwdcompare,passwd);
+    return;
+}
+
 // Entrada de ints
 int intinput(char *text)
 {
@@ -65,7 +74,6 @@ int intinput(char *text)
 
         if (endptr != input_buffer && (*endptr == '\n' || *endptr == '\0'))
         {
-            // Conversion successful, and the entire string was used
             return (int)number;
         }
     }
@@ -73,52 +81,41 @@ int intinput(char *text)
 }
 
 // Novo Cliente
-int newclient(char *str, int *numclients, struct client *clients)
+int newclient(char *str, int *numclients, struct client *client)
 {
-    int nc = numclients;
     int i;
     int check;
-    char cpf[12];
+    char cpf[128];
     int cpferro = 0;
     int accounttype = 0;
     float valor;
     while (1)
     {
-        printf("Digite seu CPF (somente números)\n-> ");
-        scanf("%s", cpf);
-
-        // ChatGPT disse pra eu usar e deu certo
-        getchar();
-
-        printf("%s",cpf);
-        printf("\n");
-        printf("%d",strlen(cpf));
-
-        if (strlen(cpf) == 11)
+        input("Digite seu CPF (somente números)\n-> ",str,1024);
+        if (strlen(str) == 12)
         {
-            for (int i = 0; i < 11; i++)
+            printf("%s",str);
+            for (int i = 0; i < 12; i++)
             {
-                if (!isdigit(cpf[i]))
+                if
+                (*(str + i) != '1' &&*(str + i) != '2' &&*(str + i) != '3' &&*(str + i) != '4' &&*(str + i) != '5' &&*(str + i) != '6' &&*(str + i) != '7' &&*(str + i) != '8' &&*(str + i) != '9' && i != 11)
                 {
                     cpferro = 1;
                     break;
                 }
             }
-        }else
-        {
-            cpferro = 1;
         }
         if(!cpferro)
         {
-            strcpy((clients + nc)->cpf,cpf);
+            strcpy(client->cpf,str);
+            break;
         }
         printf("\n");
     }
     while (1)
     {
-        if (input("Digite seu nome:\n-> ", str, 1024))
+        if (input("Digite seu nome:\n-> ", client->name, 512))
         {
-            strcpy((clients + nc)->name, str);
             break;
         }
         printf("\n");
@@ -131,13 +128,14 @@ int newclient(char *str, int *numclients, struct client *clients)
             int upperpass = 0;
             int numberpass = 0;
 
-            for (i = 0; i < 512; i++)
+            for (i = 0; i < strlen(str); i++)
             {
-                if (isupper((str + i)))
+                printf("%c",*(str + i));
+                if (isupper(*(str + i)))
                 {
                     upperpass = 1;
                 }
-                if (isdigit((str + i)))
+                if (isdigit(*(str + i)))
                 {
                     numberpass = 1;
                 }
@@ -146,7 +144,7 @@ int newclient(char *str, int *numclients, struct client *clients)
             {
                 // Criptografar senha
                 encrypt(str, key);
-                strcpy((clients + nc)->passwd, str);
+                strcpy(client->passwd, str);
                 break;
             }
             else
@@ -161,7 +159,7 @@ int newclient(char *str, int *numclients, struct client *clients)
         accounttype = intinput("Qual o tipo de conta?\n1. Comum\n2. Plus\n-> ");
         if (accounttype == 1 || accounttype == 2)
         {
-            (clients + nc)->accounttype = accounttype;
+            client->accounttype = accounttype;
             break;
         }
     }
@@ -170,21 +168,17 @@ int newclient(char *str, int *numclients, struct client *clients)
         if (input("Digite o valor inicial de capital da conta:\n-> ", str, 1024))
         {
             // Vírgula pra ponto
-            for (i = 0; i < 1024; i++)
+            for (i = 0; i < strlen(str); i++)
             {
-                if ((str + i) == ',')
+                if (*(str + i) == ',')
                 {
                     str[i] = '.';
-                    break;
-                }
-                if ((str + i) == NULL)
-                {
                     break;
                 }
             }
             // Converter pra float
             valor = strtof(str, NULL);
-            (clients + nc)->money = valor;
+            client->money = valor;
             break;
         }
     }
