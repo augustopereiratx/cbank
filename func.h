@@ -4,5 +4,5 @@ int init();
 int input(char *, char *, int);
 int intinput(char *);
 int passwdcompare(char *,char *);
-int newclient(char *,int *, struct client *);
-int listclients(int *, struct client *);
+int newclient(char *str, int *, struct client *);
+int listclients(int,struct client *);

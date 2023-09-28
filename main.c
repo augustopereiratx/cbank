@@ -10,6 +10,7 @@ int main()
     char str[512];
     int numclients = 0;
     struct client clients[100];
+    struct extrato extratos[100];
     while (1)
     {
         printf("Bem vindo ao QuemPoupaTem!\n\nSelecione:\n1. Novo cliente\n2. Apaga cliente\n3. Listar clientes\n4. Débito\n5. Depósito\n6. Extrato\n7. Transferência Entre Contas\n0. Sair");
@@ -31,7 +32,7 @@ int main()
             printf("Apagado\n");
             break;
         case 3:
-            listclients(&numclients, clients);
+            listclients(numclients, clients);
             break;
         case 4:
             printf("Debitado\n");

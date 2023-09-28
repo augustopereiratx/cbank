@@ -179,27 +179,27 @@ int newclient(char *str, int *numclients, struct client *client)
             break;
         }
     }
+    client->clientid = numclients;
     numclients++;
     return 0;
 }
 
-int listclients(int *numclients, struct client *clients)
+int listclients(int numClients,struct client *clients)
 {
-    for (int i = 0; i < numclients; i++)
+    printf("List of Clients:\n");
+
+    for (int i = 0; i < numClients + 1; i++)
     {
-        printf("Cliente %d:\n",i + 1);
-        printf("CPF: %s\n",*(clients + i)->cpf);
-        printf("Nome: %s\n",*(clients + i)->name);
-        printf("Conta: ");
-        if((clients + i)->accounttype == 1)
+        if (clients[i].accounttype == 1 || clients[i].accounttype == 2)
         {
-            printf("comum\n");
+            printf("Cliente %d:\n", i + 1);
+            printf("Nome: %s\n", clients[i].name);
+            printf("CPF: %s\n", clients[i].cpf);
+            printf("Tipo de Conta: %d\n", clients[i].accounttype);
+            printf("Dinheiro: R$%.2f\n", clients[i].money);
+            printf("Senha (criptografada): %s\n", clients[i].passwd);
+            printf("\n");
         }
-        else
-        {
-            printf("plus");
-        }
-        printf("Valor da conta: %.2f\n",(clients + i)->money);
-        printf("Senha (criptografada): %s\n",*(clients + i)->passwd);
-    }   
+    }
+    return 0;
 }
