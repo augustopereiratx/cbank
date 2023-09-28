@@ -54,7 +54,8 @@ int input(char *text, char *str, int max_len)
 }
 
 // Comparar com senha já salva (ChatGPT me ajudou com esse return)
-int passwdcompare(char *str1,char *str2) {
+int passwdcompare(char *str1, char *str2)
+{
     int result = strcmp(str1, str2);
     return (result == 0) ? 1 : 0;
 }
@@ -88,23 +89,22 @@ int newclient(char *str, int *numclients, struct client *client)
     float valor;
     while (1)
     {
-        input("Digite seu CPF (somente números)\n-> ",str,1024);
+        input("Digite seu CPF (somente números)\n-> ", str, 1024);
         if (strlen(str) == 12)
         {
-            printf("%s",str);
+            printf("%s", str);
             for (int i = 0; i < 12; i++)
             {
-                if
-                (*(str + i) != '1' &&*(str + i) != '2' &&*(str + i) != '3' &&*(str + i) != '4' &&*(str + i) != '5' &&*(str + i) != '6' &&*(str + i) != '7' &&*(str + i) != '8' &&*(str + i) != '9' && i != 11)
+                if (*(str + i) != '1' && *(str + i) != '2' && *(str + i) != '3' && *(str + i) != '4' && *(str + i) != '5' && *(str + i) != '6' && *(str + i) != '7' && *(str + i) != '8' && *(str + i) != '9' && i != 11)
                 {
                     cpferro = 1;
                     break;
                 }
             }
         }
-        if(!cpferro)
+        if (!cpferro)
         {
-            strcpy(client->cpf,str);
+            strcpy(client->cpf, str);
             break;
         }
         printf("\n");
@@ -127,7 +127,7 @@ int newclient(char *str, int *numclients, struct client *client)
 
             for (i = 0; i < strlen(str); i++)
             {
-                printf("%c",*(str + i));
+                printf("%c", *(str + i));
                 if (isupper(*(str + i)))
                 {
                     upperpass = 1;
@@ -181,4 +181,25 @@ int newclient(char *str, int *numclients, struct client *client)
     }
     numclients++;
     return 0;
+}
+
+int listclients(int *numclients, struct client *clients)
+{
+    for (int i = 0; i < numclients; i++)
+    {
+        printf("Cliente %d:\n",i + 1);
+        printf("CPF: %s\n",*(clients + i)->cpf);
+        printf("Nome: %s\n",*(clients + i)->name);
+        printf("Conta: ");
+        if((clients + i)->accounttype == 1)
+        {
+            printf("comum\n");
+        }
+        else
+        {
+            printf("plus");
+        }
+        printf("Valor da conta: %.2f\n",(clients + i)->money);
+        printf("Senha (criptografada): %s\n",*(clients + i)->passwd);
+    }   
 }
