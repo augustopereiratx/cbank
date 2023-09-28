@@ -53,13 +53,10 @@ int input(char *text, char *str, int max_len)
     }
 }
 
-// Comparar com senha já salva
-int passwdcompare(char *passwd)
-{
-    char passwdcompare[512];
-    input("Digite sua senha\n-> ",passwdcompare,512);
-    printf("%s - %s",passwdcompare,passwd);
-    return;
+// Comparar com senha já salva (ChatGPT me ajudou com esse return)
+int passwdcompare(char *str1,char *str2) {
+    int result = strcmp(str1, str2);
+    return (result == 0) ? 1 : 0;
 }
 
 // Entrada de ints

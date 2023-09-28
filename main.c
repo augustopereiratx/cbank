@@ -26,13 +26,6 @@ int main()
             newclient(str, &numclients, &clients[numclients]);
             break;
         default:
-            printf("");
-            char bruh[1024] = "Augusto1";
-            encrypt(bruh,key);
-            printf("%s",bruh);
-            decrypt(bruh,key);
-            passwdcompare(bruh);
-            encrypt(bruh,key);
             break;
     }
 }
