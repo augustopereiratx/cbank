@@ -14,7 +14,7 @@ int main()
     while (1)
     {
         c = intinput("\n-> ");
-        if (c > 0 && c <= 7)
+        if (c >= 0 && c <= 7)
         {
             break;
         }
@@ -24,6 +24,27 @@ int main()
     {
         case 1:
             newclient(str, &numclients, &clients[numclients]);
+            break;
+        case 2:
+            printf("Apagado\n");
+            break;
+        case 3:
+            printf("Listado\n");
+            break;
+        case 4:
+            printf("Debitado\n");
+            break;
+        case 5:
+            printf("Depositado\n");
+            break;
+        case 6:
+            printf("Extrato\n");
+            break;
+        case 7:
+            printf("Transferido\n");
+            break;
+        case 0:
+            printf("Até Logo!\n");
             break;
         default:
             break;
