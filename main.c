@@ -26,7 +26,8 @@ int main()
         switch (c)
         {
         case 1:
-            newclient(str, &numclients, &clients[numclients],&extratos[numclients]);
+            newclient(str, &clients[numclients],&extratos[numclients]);
+            numclients++;
             break;
         case 2:
             deleteclient(str,numclients,clients,extratos);
@@ -36,7 +37,7 @@ int main()
             listclients(numclients, clients);
             break;
         case 4:
-            printf("Debitado\n");
+            debito(str,clients,numclients);
             break;
         case 5:
             deposito(str,clients,numclients);

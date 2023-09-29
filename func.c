@@ -79,7 +79,7 @@ int intinput(char *text)
 }
 
 // Novo Cliente
-int newclient(char *str, int *numclients, struct client *client, struct extrato *extrato)
+int newclient(char *str, struct client *client, struct extrato *extrato)
 {
     int i;
     int check;
@@ -179,7 +179,6 @@ int newclient(char *str, int *numclients, struct client *client, struct extrato 
         }
     }
     strcpy(extrato->cpf, client->cpf);
-    numclients++;
     return 0;
 }
 
@@ -288,4 +287,69 @@ int deposito(char *str, struct client *clients, int numClients)
     char *end;
     float val = strtof(str, &end);
     clients[id].money += val;
+}
+
+int debito(char *str, struct client *clients, int numClients)
+{
+    int id = -1;
+    input("Digite seu CPF\n-> ", str, 1024);
+    for (int i = 0; i < numClients + 1; i++)
+    {
+        if (passwdcompare(str, clients[i].cpf))
+        {
+            id = i;
+            break;
+        }
+    }
+    if (id == -1)
+    {
+        printf("CPF não encontrado.\n");
+        return 1;
+    }
+    else
+    {
+        input("Digite sua senha:\n-> ", str, 1024);
+        encrypt(str, key);
+        if (passwdcompare(str, clients[id].passwd))
+        {
+            input("Digite o valor a ser debitado:\nR$", str, 1024);
+            for (int i = 0; i < strlen(str); i++)
+            {
+                if (str[i] == ',')
+                {
+                    str[i] = '.';
+                    break;
+                }
+            }
+            char *end;
+            float val = strtof(str, &end);
+            int check = 0;
+            if(clients[id].accounttype == 1)
+            {
+                val = val * 1.05;
+                if(clients[id].money - val >= -1000.0)
+                {
+                    check = 1;
+                }
+            }
+            else if(clients[id].accounttype == 2)
+            {
+                val = val * 1.03;
+                if(clients[id].money - val >= -5000.0)
+                {
+                    check = 1;
+                }
+            }
+            if(check)
+            {
+                clients[id].money -= val;
+            }
+            else
+            {
+                printf("Sem saldo suficiente na conta.\n");
+                return 1;
+            }
+        }
+    }
+    return 0;
 }
