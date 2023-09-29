@@ -1,6 +1,7 @@
 {
     "files.associations": {
         "locale.h": "c",
-        "string.h": "c"
+        "string.h": "c",
+        "vars.h": "c"
     }
 }

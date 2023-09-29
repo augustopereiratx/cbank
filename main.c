@@ -26,10 +26,11 @@ int main()
         switch (c)
         {
         case 1:
-            newclient(str, &numclients, &clients[numclients]);
+            newclient(str, &numclients, &clients[numclients],&extratos[numclients]);
             break;
         case 2:
-            printf("Apagado\n");
+            deleteclient(str,numclients,clients,extratos);
+            numclients--;
             break;
         case 3:
             listclients(numclients, clients);
