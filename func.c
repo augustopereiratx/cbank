@@ -178,12 +178,12 @@ int newclient(char *str, int *numclients, struct client *client, struct extrato 
             break;
         }
     }
-    strcpy(extrato->cpf,client->cpf);
+    strcpy(extrato->cpf, client->cpf);
     numclients++;
     return 0;
 }
 
-int listclients(int numClients,struct client *clients)
+int listclients(int numClients, struct client *clients)
 {
     printf("Lista de Clientes:\n");
 
@@ -194,8 +194,8 @@ int listclients(int numClients,struct client *clients)
             printf("Cliente %d:\n", i + 1);
             printf("Nome: %s\n", clients[i].name);
             printf("CPF: %s\n", clients[i].cpf);
-            printf("Tipo de Conta: ",);
-            if(clients[i].accounttype == 1)
+            printf("Tipo de Conta: ");
+            if (clients[i].accounttype == 1)
             {
                 printf("Comum\n");
             }
@@ -211,48 +211,81 @@ int listclients(int numClients,struct client *clients)
     return 0;
 }
 
-int deleteclient(char *str,int numClients,struct client *clients, struct extrato *extratos)
+int deleteclient(char *str, int numClients, struct client *clients, struct extrato *extratos)
 {
     input("Digite seu CPF (somente números)\n-> ", str, 1024);
     int id = -1;
     for (int i = 0; i < numClients + 1; i++)
     {
-        if(passwdcompare(str,clients[i].cpf))
+        if (passwdcompare(str, clients[i].cpf))
         {
             id = i;
             break;
         }
     }
-    if(id == -1)
+    if (id == -1)
     {
         printf("Cliente não encontrado.\n");
         return 1;
     }
     char pass[512];
     input("Digite sua senha:\n-> ", pass, 512);
-    encrypt(pass,key);
-    if(passwdcompare(pass,clients[id].passwd))
+    encrypt(pass, key);
+    if (passwdcompare(pass, clients[id].passwd))
     {
         int c = intinput("Deseja mesmo deletar sua conta?\n1 - Sim\n2 - Não\n-> ");
-        if(c == 2)
+        if (c == 2)
         {
             return 1;
         }
         for (int i = 0; i < numClients + 1; i++)
         {
             clients[i].accounttype = clients[i + 1].accounttype;
-            strcpy(clients[i].cpf,clients[i+1].cpf);
-            strcpy(clients[i].name,clients[i+1].name);
-            strcpy(clients[i].passwd,clients[i+1].passwd);
+            strcpy(clients[i].cpf, clients[i + 1].cpf);
+            strcpy(clients[i].name, clients[i + 1].name);
+            strcpy(clients[i].passwd, clients[i + 1].passwd);
             clients[i].money = clients[i + 1].money;
-            strcpy(extratos[i].cpf,extratos[i + 1].cpf);
-            for(int j = 0; j < 100; j++)
+            strcpy(extratos[i].cpf, extratos[i + 1].cpf);
+            for (int j = 0; j < 100; j++)
             {
-                strcpy(extratos[i].details[j],extratos[i + 1].details[j]);
+                strcpy(extratos[i].details[j], extratos[i + 1].details[j]);
             }
         }
-        
     }
 
     return 0;
+}
+
+int deposito(char *str, struct client *clients, int numClients)
+{
+    int id = -1;
+    input("Digite seu CPF\n-> ", str, 1024);
+    for (int i = 0; i < numClients + 1; i++)
+    {
+        if (passwdcompare(str, clients[i].cpf))
+        {
+            id = i;
+            break;
+        }
+    }
+    if (id == -1)
+    {
+        printf("CPF não encontrado.\n");
+        return 1;
+    }
+    else
+    {
+        input("Digite o valor a ser depositado:\nR$", str, 1024);
+        for (int i = 0; i < strlen(str); i++)
+        {
+            if (str[i] == ',')
+            {
+                str[i] = '.';
+                break;
+            }
+        }
+    }
+    char *end;
+    float val = strtof(str, &end);
+    clients[id].money += val;
 }

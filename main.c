@@ -39,7 +39,7 @@ int main()
             printf("Debitado\n");
             break;
         case 5:
-            printf("Depositado\n");
+            deposito(str,clients,numclients);
             break;
         case 6:
             printf("Extrato\n");
