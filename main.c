@@ -7,13 +7,15 @@ int main()
 {
     init();
     int c;
-    char str[512];
+    char str[1024];
     int numclients = 0;
-    struct client clients[100];
-    struct extrato extratos[100];
+    struct client clients[MAXCLIENTS];
+    loaddata(clients,&numclients,sizeof(clients),sizeof(numclients));
+    printf("\n%d\n",numclients);
+    printf("Bem vindo(a) ao QuemPoupaTem!\n\n");
     while (1)
     {
-        printf("Bem vindo ao QuemPoupaTem!\n\nSelecione:\n1. Novo cliente\n2. Apaga cliente\n3. Listar clientes\n4. Débito\n5. Depósito\n6. Extrato\n7. Transferência Entre Contas\n0. Sair");
+        printf("Selecione:\n1. Novo cliente\n2. Apaga cliente\n3. Listar clientes\n4. Débito\n5. Depósito\n6. Extrato\n7. Transferência Entre Contas\n0. Sair");
         while (1)
         {
             c = intinput("\n-> ");
@@ -26,11 +28,11 @@ int main()
         switch (c)
         {
         case 1:
-            newclient(str, &clients[numclients],&extratos[numclients]);
+            newclient(str, &clients[numclients]);
             numclients++;
             break;
         case 2:
-            deleteclient(str,numclients,clients,extratos);
+            deleteclient(str,numclients,clients);
             numclients--;
             break;
         case 3:
@@ -43,13 +45,14 @@ int main()
             deposito(str,clients,numclients);
             break;
         case 6:
-            printf("Extrato\n");
+            showextr(str,clients,numclients);
             break;
         case 7:
             printf("Transferido\n");
             break;
         case 0:
             printf("Até Logo!\n");
+            savedata(clients,&numclients,sizeof(clients),sizeof(numclients));
             break;
         default:
             break;
