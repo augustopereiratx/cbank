@@ -232,7 +232,6 @@ int listclients(int numClients, struct client *clients)
                 printf("Plus\n");
             }
             printf("Dinheiro: R$%.2f\n", clients[i].money);
-            printf("Senha (criptografada): %s\n", clients[i].passwd);
             printf("\n");
         }
     }
@@ -453,7 +452,7 @@ int showextr(char *str, struct client *clients, int numClients)
     }
 }
 
-int savedata(struct client *clients, int *numClients, int sizeclients, int sizenum)
+int savedata(struct clients *clientlist, int sizeclients)
 {
     FILE *bin = fopen("save.bin", "wb");
     if (bin == NULL)
@@ -461,15 +460,9 @@ int savedata(struct client *clients, int *numClients, int sizeclients, int sizen
         printf("Erro ao abrir arquivo para salvar.\n");
         return 1;
     }
-    if (fwrite(clients, sizeclients, sizeclients / sizeof(struct client), bin) != 1)
+    if (fwrite(clientlist, sizeclients, 1, bin) != 1)
     {
-        printf("Erro ao escrever no arquivo. (clients)\n");
-        fclose(bin);
-        return 2;
-    }
-    if (fwrite(numClients, sizenum, 1, bin) != 1)
-    {
-        printf("Erro ao escrever no arquivo. (numclients)\n");
+        printf("Erro ao escrever no arquivo. (clientlist)\n");
         fclose(bin);
         return 2;
     }
@@ -477,7 +470,7 @@ int savedata(struct client *clients, int *numClients, int sizeclients, int sizen
     return 0;
 }
 
-int loaddata(struct client *clients, int *numClients, int sizeclients, int sizenum)
+int loaddata(struct clients *clientlist, int sizeclients)
 {
     FILE *bin = fopen("save.bin", "rb");
     if (bin == NULL)
@@ -485,15 +478,9 @@ int loaddata(struct client *clients, int *numClients, int sizeclients, int sizen
         printf("Erro ao abrir arquivo para leitura.\n");
         return 1;
     }
-    if (fread(clients, sizeclients, sizeclients/sizeof(struct client), bin) != 1)
+    if (fread(clientlist, sizeclients, 1, bin) != 1)
     {
-        printf("Erro ao ler o arquivo. (clients)\n");
-        fclose(bin);
-        return 2;
-    }
-    if (fread(numClients, sizenum, 1, bin) != 1)
-    {
-        printf("Erro ao ler o arquivo. (numclients)\n");
+        printf("Erro ao escrever no arquivo. (clientlist)\n");
         fclose(bin);
         return 2;
     }

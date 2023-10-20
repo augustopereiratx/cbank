@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include "func.h"
 #include "vars.h"
 #include <string.h>
@@ -9,9 +10,9 @@ int main()
     int c;
     char str[1024];
     int numclients = 0;
-    struct client clients[MAXCLIENTS];
-    loaddata(clients,&numclients,sizeof(clients),sizeof(numclients));
-    printf("\n%d\n",numclients);
+    struct clients *clientlist = malloc(sizeof(struct clients));
+    clientlist->numclients = 0;
+    loaddata(clientlist,sizeof(clientlist));
     printf("Bem vindo(a) ao QuemPoupaTem!\n\n");
     while (1)
     {
@@ -28,31 +29,32 @@ int main()
         switch (c)
         {
         case 1:
-            newclient(str, &clients[numclients]);
+            newclient(str, &clientlist->clients[numclients]);
             numclients++;
             break;
         case 2:
-            deleteclient(str,numclients,clients);
+            deleteclient(str,numclients,clientlist->clients);
             numclients--;
             break;
         case 3:
-            listclients(numclients, clients);
+            listclients(numclients, clientlist->clients);
             break;
         case 4:
-            debito(str,clients,numclients);
+            debito(str,clientlist->clients,clientlist->numclients);
             break;
         case 5:
-            deposito(str,clients,numclients);
+            deposito(str,clientlist->clients,clientlist->numclients);
             break;
         case 6:
-            showextr(str,clients,numclients);
+            showextr(str,clientlist->clients,clientlist->numclients);
             break;
         case 7:
             printf("Transferido\n");
             break;
         case 0:
             printf("Até Logo!\n");
-            savedata(clients,&numclients,sizeof(clients),sizeof(numclients));
+            savedata(clientlist,sizeof(clientlist));
+            free(clientlist);
             break;
         default:
             break;

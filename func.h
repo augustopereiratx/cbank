@@ -12,5 +12,5 @@ int deleteclient(char *,int ,struct client *);
 int deposito(char *,struct client *,int);
 int debito(char *,struct client *,int);
 int showextr(char *,struct client *,int);
-int savedata(struct client *,int *,int,int);
-int loaddata(struct client *,int *,int,int);
+int savedata(struct clients *, int);
+int loaddata(struct clients *, int);
