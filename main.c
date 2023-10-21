@@ -1,18 +1,17 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "func.h"
 #include "vars.h"
-#include <string.h>
 
 int main()
 {
     init();
     int c;
     char str[1024];
-    int numclients = 0;
     struct clients *clientlist = malloc(sizeof(struct clients));
     clientlist->numclients = 0;
-    loaddata(clientlist,sizeof(clientlist));
+    loaddata(clientlist,sizeof(*clientlist));
     printf("Bem vindo(a) ao QuemPoupaTem!\n\n");
     while (1)
     {
@@ -24,20 +23,20 @@ int main()
             {
                 break;
             }
-            printf("\nSelecione uma opção válida.");
+            printf("\nSelecione uma opção válida.\n");
         }
         switch (c)
         {
         case 1:
-            newclient(str, &clientlist->clients[numclients]);
-            numclients++;
+            newclient(str, &clientlist->clients[clientlist->numclients]);
+            clientlist->numclients++;
             break;
         case 2:
-            deleteclient(str,numclients,clientlist->clients);
-            numclients--;
+            deleteclient(str,clientlist->numclients,clientlist->clients);
+            clientlist->numclients--;
             break;
         case 3:
-            listclients(numclients, clientlist->clients);
+            listclients(clientlist->numclients, clientlist->clients);
             break;
         case 4:
             debito(str,clientlist->clients,clientlist->numclients);
@@ -49,18 +48,14 @@ int main()
             showextr(str,clientlist->clients,clientlist->numclients);
             break;
         case 7:
-            printf("Transferido\n");
+            transfer(str,clientlist->clients,clientlist->numclients);
             break;
         case 0:
             printf("Até Logo!\n");
-            savedata(clientlist,sizeof(clientlist));
+            savedata(clientlist,sizeof(*clientlist));
             free(clientlist);
-            break;
+            return 0;
         default:
-            break;
-        }
-        if (c == 0)
-        {
             break;
         }
     }

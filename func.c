@@ -17,16 +17,10 @@ void encrypt(char *passwd, const char *key)
     }
 }
 
-// Decryption function
+// Wrapper da func de encriptar (faz o mesmo processo para retornar a string)
 void decrypt(char *passwd, const char *key)
 {
-    int keyLen = strlen(key);
-    int passwdLen = strlen(passwd);
-
-    for (int i = 0; i < passwdLen; i++)
-    {
-        passwd[i] ^= key[i % keyLen];
-    }
+    encrypt(passwd,key);
 }
 
 // Função para incicializar acentos em português
@@ -211,6 +205,7 @@ int newclient(char *str, struct client *client)
     return 0;
 }
 
+// Listar Clientes
 int listclients(int numClients, struct client *clients)
 {
     printf("Lista de Clientes:\n");
@@ -241,6 +236,28 @@ int listclients(int numClients, struct client *clients)
 // Achar id do cliente para usar em outras funcs
 int validateclient(char *str, int numClients, struct client *clients, int requirePW)
 {
+    if (requirePW == 2)
+    {
+        input("Digite o CPF do destinatário (somente números)\n-> ", str, 1024);
+        int id = -1;
+        for (int i = 0; i < numClients + 1; i++)
+        {
+            if (strcompare(str, clients[i].cpf))
+            {
+                id = i;
+                break;
+            }
+        }
+        if (id == -1)
+        {
+            return -1;
+        }
+        else
+        {
+            return id;
+        }
+    }
+
     input("Digite seu CPF (somente números)\n-> ", str, 1024);
     int id = -1;
     for (int i = 0; i < numClients + 1; i++)
@@ -275,6 +292,39 @@ int validateclient(char *str, int numClients, struct client *clients, int requir
     }
 }
 
+// Marcar no extrato (fiz essa func pra deixar o código mais modular)
+int makeextr(struct client *clients, int id, float val, float taxa, int transaction_type)
+{
+    char *string = malloc(128 * sizeof(char));
+    switch (transaction_type)
+    {
+    case 0:
+        // Débito
+        sprintf(string,"Débito - R$%.2f - Taxa - R$%.2f", val, taxa);
+        break;
+    case 1:
+        // Depósito
+        sprintf(string,"Depósito - R$%.2f", val);
+        break;
+    default:
+        return 1;
+    }
+
+    if (clients[id].extr.detailcount == 100)
+    {
+        resetextr(clients, id);
+        strcpy(clients[id].extr.details[99],string);
+    }
+    else
+    {
+        strcpy(clients[id].extr.details[clients[id].extr.detailcount],string);
+        clients[id].extr.detailcount++;
+    }
+    free(string);
+    return 0;
+}
+
+// Deletar Cliente
 int deleteclient(char *str, int numClients, struct client *clients)
 {
     int id = validateclient(str, numClients, clients, 1);
@@ -308,6 +358,7 @@ int deleteclient(char *str, int numClients, struct client *clients)
     return 0;
 }
 
+// Fazer loop no Extrato
 int resetextr(struct client *clients, int id)
 {
     for (int i = 0; i < 100; i++)
@@ -340,17 +391,8 @@ int deposito(char *str, struct client *clients, int numClients)
     }
     char *end;
     float val = strtof(str, &end);
-    if (clients[id].extr.detailcount == 100)
-    {
-        resetextr(clients, id);
-        sprintf(clients[id].extr.details[99], "Depósito - R$%.2f\n", val);
-    }
-    else
-    {
-        sprintf(clients[id].extr.details[clients[id].extr.detailcount], "Depósito - R$%.2f\n", val);
-        clients[id].extr.detailcount++;
-    }
     clients[id].money += val;
+    makeextr(clients,id,val,0.0,1);
     return 0;
 }
 
@@ -399,16 +441,7 @@ int debito(char *str, struct client *clients, int numClients)
         if (check)
         {
             clients[id].money -= val;
-            if (clients[id].extr.detailcount == 100)
-            {
-                resetextr(clients, id);
-                sprintf(clients[id].extr.details[99], "Débito - R$%.2f - Taxa - R$%.2f\n", val, taxa);
-            }
-            else
-            {
-                sprintf(clients[id].extr.details[clients[id].extr.detailcount], "Débito - R$%.2f - Taxa - R$%.2f\n", val, taxa);
-                clients[id].extr.detailcount++;
-            }
+            makeextr(clients,id,val,taxa,0);
         }
         else
         {
@@ -419,6 +452,7 @@ int debito(char *str, struct client *clients, int numClients)
     return 0;
 }
 
+// Mostrar e Salvar Extrato em um TXT com nome do usuário
 int showextr(char *str, struct client *clients, int numClients)
 {
     int id = validateclient(str, numClients, clients, 1);
@@ -450,6 +484,69 @@ int showextr(char *str, struct client *clients, int numClients)
         }
         fclose(f);
     }
+}
+
+int transfer(char *str, struct client *clients, int numClients)
+{
+    int id = validateclient(str, numClients, clients, 1);
+    if (id == -1)
+    {
+        clienterror();
+        return 1;
+    }
+    int destid = validateclient(str, numClients, clients, 2);
+    if (destid == -1)
+    {
+        clienterror();
+        return 2;
+    }
+    input("Digite o valor a ser transferido:\nR$", str, 1024);
+    for (int i = 0; i < strlen(str); i++)
+    {
+        if (str[i] == ',')
+        {
+            str[i] = '.';
+            break;
+        }
+    }
+    char *end;
+    float val = strtof(str, &end);
+    float destval = val;
+    int check = 0;
+    float taxa = 0.0;
+    if (clients[id].accounttype == 1)
+    {
+        taxa = (val * 5) / 100;
+        val = val + taxa;
+        if (clients[id].money - val >= -1000.0)
+        {
+            check = 1;
+        }
+    }
+    else if (clients[id].accounttype == 2)
+    {
+        taxa = (val * 3) / 100;
+
+        val = val + taxa;
+        if (clients[id].money - val >= -5000.0)
+        {
+            check = 1;
+        }
+    }
+    if (check)
+    {
+        clients[id].money -= val;
+        makeextr(clients,id,val,taxa,0);
+
+        clients[destid].money += destval;
+        makeextr(clients,destid,destval,taxa,1);
+    }
+    else
+    {
+        printf("Sem saldo suficiente na conta.\n");
+        return 1;
+    }
+    return 0;
 }
 
 int savedata(struct clients *clientlist, int sizeclients)
