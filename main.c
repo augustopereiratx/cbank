@@ -28,7 +28,7 @@ int main()
         switch (c)
         {
         case 1:
-            newclient(str, &clientlist->clients[clientlist->numclients]);
+            newclient(str, clientlist->clients,clientlist->numclients);
             clientlist->numclients++;
             break;
         case 2:

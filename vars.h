@@ -12,7 +12,7 @@ struct extrato
 struct client
 {
     int accounttype;
-    float money;
+    double money;
     char name[128];
     char cpf[64];
     char passwd[128];

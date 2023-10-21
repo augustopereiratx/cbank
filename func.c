@@ -6,6 +6,7 @@
 #include "vars.h"
 
 // Criptografia básica (obrigado ChatGPT)
+// Esse tipo de crypt é inseguro, mas pra esse projeto é ok
 void encrypt(char *passwd, const char *key)
 {
     int keyLen = strlen(key);
@@ -20,7 +21,7 @@ void encrypt(char *passwd, const char *key)
 // Wrapper da func de encriptar (faz o mesmo processo para retornar a string)
 void decrypt(char *passwd, const char *key)
 {
-    encrypt(passwd,key);
+    encrypt(passwd, key);
 }
 
 // Função para incicializar acentos em português
@@ -53,12 +54,13 @@ int input(char *text, char *str, int max_len)
     }
 }
 
-// Comparar com senha já salva (ChatGPT me ajudou com esse return)
+// Comparar uma string com a outra (ChatGPT me ajudou com esse return)
 int strcompare(char *str1, char *str2)
 {
     int result = strcmp(str1, str2);
     if (result == 0)
     {
+        // Compara cada char pra ver se é igual mesmo
         for (int i = 0; i < strlen(str2); i++)
         {
             if (str1[i] != str2[i])
@@ -78,10 +80,12 @@ int intinput(char *text)
     if (fgets(input_buffer, sizeof(input_buffer), stdin) != NULL)
     {
         char *endptr;
+        // mesma lógica do input de strings, só muda de str pra long
         long number = strtol(input_buffer, &endptr, 10);
 
         if (endptr != input_buffer && (*endptr == '\n' || *endptr == '\0'))
         {
+            // aqui o long vira int
             return (int)number;
         }
     }
@@ -89,16 +93,17 @@ int intinput(char *text)
 }
 
 // Novo Cliente
-int newclient(char *str, struct client *client)
+int newclient(char *str, struct client *clients, int numClients)
 {
     int i;
-    int check;
-    char cpf[128];
-    int cpferro = 0;
+    int check = 0;
+    int cpferro;
     int accounttype = 0;
-    float valor;
+    double valor;
+    // Eu uso whiles pra prender o usuáro enquanto ele não termina esse processo
     while (1)
     {
+        cpferro = 0;
         input("Digite seu CPF (somente números)\n-> ", str, 1024);
         if (strlen(str) == 12)
         {
@@ -109,6 +114,25 @@ int newclient(char *str, struct client *client)
                     cpferro = 1;
                 }
             }
+            if (!cpferro)
+            {
+                for (int i = 0; i < numClients; i++)
+                {
+                    cpferro = 1;
+                    for (int j = 0; j < 11; j++)
+                    {
+                        if (str[j] != clients[i].cpf[j])
+                        {
+                            cpferro = 0;
+                            break;
+                        }
+                    }
+                }
+                if (cpferro)
+                {
+                    printf("CPF já em uso.\n");
+                }
+            }
         }
         else
         {
@@ -116,23 +140,35 @@ int newclient(char *str, struct client *client)
         }
         if (!cpferro)
         {
-            strcpy(client->cpf, str);
+            strcpy(clients[numClients].cpf, str);
             break;
         }
         printf("\n");
     }
     while (1)
     {
-        if (input("Digite seu nome:\n-> ", client->name, 512))
+        if (input("Digite seu nome:\n-> ", clients[numClients].name, 512))
         {
-            for (int i = 0; i < strlen(client->name); i++)
+            for (int i = 0; i < strlen(clients[numClients].name); i++)
             {
-                if (client->name[i] == '\n')
+                // Vê se tem espaço no nome
+                if (clients[numClients].name[i] == ' ')
                 {
-                    client->name[i] = '\0';
+                    check = 1;
+                    continue;
+                }
+
+                // Troca um \n no final pra \0. Não sei porque tem \n ali
+                if (clients[numClients].name[i] == '\n')
+                {
+                    clients[numClients].name[i] = '\0';
                 }
             }
-
+            if (!check)
+            {
+                printf("É necessário pelo menos um nome e um sobrenome.\n");
+                continue;
+            }
             break;
         }
         printf("\n");
@@ -141,7 +177,7 @@ int newclient(char *str, struct client *client)
     {
         if (input("Digite sua senha: (deve conter ao menos uma letra maiúscula e um número)\n-> ", str, 1024))
         {
-            // Verificar senha
+            // Verificar se senha tem maiúscula e número
             int upperpass = 0;
             int numberpass = 0;
 
@@ -151,22 +187,28 @@ int newclient(char *str, struct client *client)
                 if (isupper(*(str + i)))
                 {
                     upperpass = 1;
+                    continue;
                 }
                 if (isdigit(*(str + i)))
                 {
                     numberpass = 1;
+                    continue;
+                }
+                if (numberpass && upperpass)
+                {
+                    break;
                 }
             }
-            if (numberpass == 1 && upperpass == 1)
+            if (numberpass && upperpass)
             {
                 // Criptografar senha
                 encrypt(str, key);
-                strcpy(client->passwd, str);
+                strcpy(clients[numClients].passwd, str);
                 break;
             }
             else
             {
-                printf("Senha fraca. Tente novamente.");
+                printf("Senha fraca. Tente novamente.\n");
             }
         }
         printf("\n");
@@ -176,7 +218,7 @@ int newclient(char *str, struct client *client)
         accounttype = intinput("Qual o tipo de conta?\n1. Comum\n2. Plus\n-> ");
         if (accounttype == 1 || accounttype == 2)
         {
-            client->accounttype = accounttype;
+            clients[numClients].accounttype = accounttype;
             break;
         }
     }
@@ -193,12 +235,12 @@ int newclient(char *str, struct client *client)
                     break;
                 }
             }
-            // Converter pra float
+            // Converter pra double
             valor = strtof(str, NULL);
-            client->money = valor;
+            clients[numClients].money = valor;
 
             // "inicialização" do extrato
-            client->extr.detailcount = 0;
+            clients[numClients].extr.detailcount = 0;
             break;
         }
     }
@@ -236,6 +278,7 @@ int listclients(int numClients, struct client *clients)
 // Achar id do cliente para usar em outras funcs
 int validateclient(char *str, int numClients, struct client *clients, int requirePW)
 {
+    // Exceção para casos de transferência (destinatário)
     if (requirePW == 2)
     {
         input("Digite o CPF do destinatário (somente números)\n-> ", str, 1024);
@@ -290,21 +333,22 @@ int validateclient(char *str, int numClients, struct client *clients, int requir
     {
         return id;
     }
+    return -1;
 }
 
 // Marcar no extrato (fiz essa func pra deixar o código mais modular)
-int makeextr(struct client *clients, int id, float val, float taxa, int transaction_type)
+int makeextr(struct client *clients, int id, double val, double taxa, int transaction_type)
 {
     char *string = malloc(128 * sizeof(char));
     switch (transaction_type)
     {
     case 0:
         // Débito
-        sprintf(string,"Débito - R$%.2f - Taxa - R$%.2f", val, taxa);
+        sprintf(string, "Débito - R$%.2f - Taxa - R$%.2f", val, taxa);
         break;
     case 1:
         // Depósito
-        sprintf(string,"Depósito - R$%.2f", val);
+        sprintf(string, "Depósito - R$%.2f", val);
         break;
     default:
         return 1;
@@ -313,11 +357,11 @@ int makeextr(struct client *clients, int id, float val, float taxa, int transact
     if (clients[id].extr.detailcount == 100)
     {
         resetextr(clients, id);
-        strcpy(clients[id].extr.details[99],string);
+        strcpy(clients[id].extr.details[99], string);
     }
     else
     {
-        strcpy(clients[id].extr.details[clients[id].extr.detailcount],string);
+        strcpy(clients[id].extr.details[clients[id].extr.detailcount], string);
         clients[id].extr.detailcount++;
     }
     free(string);
@@ -358,7 +402,7 @@ int deleteclient(char *str, int numClients, struct client *clients)
     return 0;
 }
 
-// Fazer loop no Extrato
+// Fazer loop no Extrato (necessário para ver sempre os 100 últimos casos)
 int resetextr(struct client *clients, int id)
 {
     for (int i = 0; i < 100; i++)
@@ -390,9 +434,9 @@ int deposito(char *str, struct client *clients, int numClients)
         }
     }
     char *end;
-    float val = strtof(str, &end);
+    double val = strtof(str, &end);
     clients[id].money += val;
-    makeextr(clients,id,val,0.0,1);
+    makeextr(clients, id, val, 0.0, 1);
     return 0;
 }
 
@@ -417,9 +461,9 @@ int debito(char *str, struct client *clients, int numClients)
             }
         }
         char *end;
-        float val = strtof(str, &end);
+        double val = strtof(str, &end);
         int check = 0;
-        float taxa = 0.0;
+        double taxa = 0.0;
         if (clients[id].accounttype == 1)
         {
             taxa = (val * 5) / 100;
@@ -441,7 +485,7 @@ int debito(char *str, struct client *clients, int numClients)
         if (check)
         {
             clients[id].money -= val;
-            makeextr(clients,id,val,taxa,0);
+            makeextr(clients, id, val, taxa, 0);
         }
         else
         {
@@ -488,18 +532,22 @@ int showextr(char *str, struct client *clients, int numClients)
 
 int transfer(char *str, struct client *clients, int numClients)
 {
+    // Origem
     int id = validateclient(str, numClients, clients, 1);
     if (id == -1)
     {
         clienterror();
         return 1;
     }
+
+    // Destinatário
     int destid = validateclient(str, numClients, clients, 2);
     if (destid == -1)
     {
         clienterror();
         return 2;
     }
+
     input("Digite o valor a ser transferido:\nR$", str, 1024);
     for (int i = 0; i < strlen(str); i++)
     {
@@ -510,10 +558,12 @@ int transfer(char *str, struct client *clients, int numClients)
         }
     }
     char *end;
-    float val = strtof(str, &end);
-    float destval = val;
+    double val = strtof(str, &end);
+    double destval = val;
     int check = 0;
-    float taxa = 0.0;
+    double taxa = 0.0;
+
+    // Aplicar taxa
     if (clients[id].accounttype == 1)
     {
         taxa = (val * 5) / 100;
@@ -533,13 +583,16 @@ int transfer(char *str, struct client *clients, int numClients)
             check = 1;
         }
     }
+
     if (check)
     {
+        // Origem tem taxa + valor removidos
         clients[id].money -= val;
-        makeextr(clients,id,val,taxa,0);
+        makeextr(clients, id, val, taxa, 0);
 
+        // Destino tem somente o valor adicionado (destval)
         clients[destid].money += destval;
-        makeextr(clients,destid,destval,taxa,1);
+        makeextr(clients, destid, destval, 0.0, 1);
     }
     else
     {
