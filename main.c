@@ -58,5 +58,8 @@ int main()
         default:
             break;
         }
+        savedata(clientlist,sizeof(*clientlist));
     }
+    // Não é pro código vir pra esse return
+    return 1;
 }
